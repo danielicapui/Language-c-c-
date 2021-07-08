@@ -4,6 +4,15 @@
 #include <conio.h>
 #include <stdbool.h>
 #include <math.h>
+
+#define typeof(var) _Generic( (var),\
+char: "Char",\
+int: "Integer",\
+float: "Float",\
+char *: "String",\
+void *: "Pointer",\
+default: "Undefined")
+
 //estrutura aluno com os campos:Estado,Idade,Sexo.
 typedef struct
 {
@@ -176,20 +185,16 @@ void criarPartida(int tam,Partida partida[tam])
 {
     for(int i=0;i<tam;i++)
     {
-        Time time1;
-        Time time2;
-        time1.pontuacoes=0;
-        time2.pontuacoes=0;
         printf("Digite o nome do time1:\n");
-        scanf("%s",time1.nome);
-        partida[i].time1=time1;
+        scanf("%s",partida[i].time1.nome);
         printf("Digite o número de gols do time1:\n");
         scanf("%d",&partida[i].gols1);
         printf("Digite o nome do time2:\n");
-        scanf("%s",time2.nome);
-        partida[i].time2=time2;
+        scanf("%s",partida[i].time2.nome);
         printf("Digite o número de gols do time2:\n");
         scanf("%d",&partida[i].gols2);
+        partida[i].time1.pontuacoes=0;
+        partida[i].time2.pontuacoes=0;
     }
 }
 
@@ -224,12 +229,35 @@ void copiaArray(char nome[50],char nome1[50])
       nome[i]=nome1[i];  
     }
 }
+void salvarFile(int tam,Time time[tam])
+{
+    int j=tam;
+    FILE *arq;
+    int result;
+    arq = fopen("saida.txt", "wt");
+    if (arq == NULL)
+    {
+        printf("Arquivo não encontrado\n");
+        return;
+    }
+    char padrao[50]="default";
+    while(j--)
+    {
+        if (strcmp(time[j].nome,padrao)!=0)
+        {
+            fprintf(arq,"Nome: %s Pontos:%d\n",time[j].nome,time[j].pontuacoes);
+        }
+    }
+    fclose(arq);
+}
 void mostrarResultado(int tam,Time time[tam])
 {
     int i=tam;
+    char padrao[50]="default";
     while(i--)
     {
-        printf("Nome: %s Pontos:%d\n",time[i].nome,time[i].pontuacoes);
+        if (strcmp(time[i].nome,padrao)!=0)
+            printf("Nome: %s Pontos:%d\n",time[i].nome,time[i].pontuacoes);
     }
 }
 
@@ -250,18 +278,27 @@ void timeSort(int tam,Time *time)
 void analiseCampeonato(int tam,Partida partida[tam],int tam1,Time time[tam1])
 {
     int pontos=0;
+    int c=0;
+    char name[50]="default";
+    for(int i=0;i<tam1;i++)
+    {
+        time[i].pontuacoes=0;
+        copiaArray(time[i].nome,name);
+    }
     for(int i=0;i<tam;i++)
     {
         partida[i].time2.pontuacoes;
         if (notIn(tam1,time,partida[i].time1.nome)==false)
         {
-            copiaArray(time[i].nome,partida[i].time1.nome);
-            time[i].pontuacoes=0;
+            copiaArray(time[c].nome,partida[i].time1.nome);
+            time[c].pontuacoes=0;
+            c++;
         }
         if (notIn(tam1,time,partida[i].time2.nome)==false)
         {
-            copiaArray(time[i].nome,partida[i].time2.nome);
-            time[i].pontuacoes=0;
+            copiaArray(time[c].nome,partida[i].time2.nome);
+            time[c].pontuacoes=0;
+            c++;
         }
         
         if(partida[i].gols1==partida[i].gols2)
@@ -285,10 +322,6 @@ void analiseCampeonato(int tam,Partida partida[tam],int tam1,Time time[tam1])
             }
         }
     }
-    for(int i=0;i<tam;i++)
-    {
-        printf("pontos:%d\npontos2:%d\n",partida[i].time1.pontuacoes,partida[i].time2.pontuacoes);
-    }
     //verificar os pontos
     for(int i=0;i<tam1;i++)
     {
@@ -307,6 +340,7 @@ void analiseCampeonato(int tam,Partida partida[tam],int tam1,Time time[tam1])
     }
     timeSort(tam1,time);
     mostrarResultado(tam1,time);
+    salvarFile(tam1,time);
 }
 
 void questao1a()
@@ -341,29 +375,32 @@ void questao2a()
 }
 void questao2b()
 {
-    int tam=2;
+    //Substituia para o número de jogos
+    int tam;
+    printf("Digite o número de partidas:\n");
+    scanf("%d",&tam);
     Partida partida[tam];
-    int tam1=4;
+    int tam1=tam*2;
     Time time[tam1];
     //teste depois comente.
-    char nome[50]="ana";
-    char nome1[50]="lucas";
-    char nome2[50]="caio";
-    char nome3[50]="lucas";
-    copiaArray(partida[0].time1.nome,nome);
-    partida[0].gols1=0;
-    copiaArray(partida[0].time2.nome,nome1);
-    partida[0].gols2=1;
-    copiaArray(partida[1].time1.nome,nome2);
-    partida[1].gols1=4;
-    copiaArray(partida[1].time2.nome,nome3);
-    partida[1].gols2=5;
-    partida[0].time1.pontuacoes=0;
-    partida[0].time2.pontuacoes=0;
-    partida[1].time1.pontuacoes=0;
-    partida[1].time2.pontuacoes=0;
+    // char nome[50]="ana";
+    // char nome1[50]="lucas";
+    // char nome2[50]="caio";
+    // char nome3[50]="lucas";
+    // copiaArray(partida[0].time1.nome,nome);
+    // partida[0].gols1=0;
+    // copiaArray(partida[0].time2.nome,nome1);
+    // partida[0].gols2=1;
+    // copiaArray(partida[1].time1.nome,nome2);
+    // partida[1].gols1=4;
+    // copiaArray(partida[1].time2.nome,nome3);
+    // partida[1].gols2=5;
+    // partida[0].time1.pontuacoes=0;
+    // partida[0].time2.pontuacoes=0;
+    // partida[1].time1.pontuacoes=0;
+    // partida[1].time2.pontuacoes=0;
     //fim de teste
-    //criarPartida(tam,partida);
+    criarPartida(tam,partida);
     analiseCampeonato(tam,partida,tam1,time);
 }
 int main()
@@ -386,6 +423,7 @@ int main()
     else if (q==4)
     {
         questao2b();
+        //questão3() inclusa
     }
     return 0;  
    //use prova.c<entrada.in>saida.txt
