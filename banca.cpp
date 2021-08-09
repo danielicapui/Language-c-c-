@@ -7,6 +7,7 @@ typedef struct
     std::string data,projeto,membro1,membro2,membro3;
     int hora;
 }Banca;
+//verifica se um membro está ocupado durante certa hora
 bool isWorking(Banca aux,std::string nome,std::vector<Banca>& banca)
 {
     if (banca.empty()==true)
@@ -15,7 +16,8 @@ bool isWorking(Banca aux,std::string nome,std::vector<Banca>& banca)
     }
     for(int i=0;i<banca.size();i++)
     {
-        if ((strcasecmp(banca[i].membro1.c_str(),nome.c_str())==0 || strcasecmp(banca[i].membro2.c_str(),nome.c_str())==0 || strcasecmp(banca[i].membro3.c_str(),nome.c_str())==0) && (banca[i].data==aux.data && banca[i].hora==aux.hora))
+        //poderia usar a função de comparar por contéudo mas certas pessoas podem ter o mesmo contéudo.
+        if (((banca[i].membro1==nome) || (banca[i].membro2==nome) || (banca[i].membro3==nome)) && (banca[i].data==aux.data && banca[i].hora==aux.hora))
         {
             std::cout<<"Esse membro está ocupado em outra banca, com o nome de projeto: "<<banca[i].projeto<<std::endl;
             std::cout<<"Digite outro nome, por favor!"<<std::endl;
@@ -24,6 +26,7 @@ bool isWorking(Banca aux,std::string nome,std::vector<Banca>& banca)
     }
     return false;
 }
+//adiciona um membro de forma mais segura
 std::string addMembro(Banca aux,std::vector<Banca>& banca)
 {
     std::string membro;
@@ -33,9 +36,11 @@ std::string addMembro(Banca aux,std::vector<Banca>& banca)
     }while(isWorking(aux,membro,banca)!=false);
     return membro;
 }
+//função para criar uma banca
 Banca criarBanca(std::vector<Banca>& banca)
 {
     Banca aux;
+    //Lembre-se que se quiser nomes de pessoa completas pode usar um gets.
     std::cout<<"Formato de data 'dd//mm//yyyy' de horário inteiros '0 a 23', membros 'nome',projeto 'nome'"<<std::endl;
     std::cout<<"Digite a data:"<<std::endl;
     std::cin>>aux.data;
@@ -48,6 +53,7 @@ Banca criarBanca(std::vector<Banca>& banca)
     aux.membro3=addMembro(aux,banca);
     return aux;
 }
+//mostrar os dados de um banca
 void bancaId(int id,Banca banca)
 {
     std::cout<<"-------------------------------"<<std::endl;
@@ -61,21 +67,24 @@ void bancaId(int id,Banca banca)
     std::cout<<"Membro3:"<<banca.membro3<<std::endl;
     std::cout<<"------------------------"<<std::endl;
 }
+//mostrar todas as bancas
 void mostrarBancas(std::vector<Banca>& banca)
 {
-    std::cout<<banca.size()<<"Bancas cadastradas!"<<std::endl;
+    std::cout<<banca.size()<<" Bancas cadastradas!"<<std::endl;
     for(int i=0;i<banca.size();i++)
     {
        bancaId(i,banca[i]);
     }
 }
+//função para rpocurar por nome de projeto
 int getId(std::string projeto,std::vector<Banca>& banca)
 {
     if(!banca.empty())
     {
         for(int i=0;i<banca.size();i++)
         {
-            if (strcasecmp(banca[i].projeto.c_str(),projeto.c_str())==0)
+            //strcasecmp pode comparar por nome de projeto
+            if (banca[i].projeto==projeto)
             {
                 return i;
             }
@@ -84,6 +93,7 @@ int getId(std::string projeto,std::vector<Banca>& banca)
     }
     return -1;
 }
+//verifica se alteração é valida
 bool isValid(Banca aux,std::vector<Banca>& banca)
 {
     bool a=isWorking(aux,aux.membro1,banca);
@@ -99,6 +109,7 @@ bool isValid(Banca aux,std::vector<Banca>& banca)
         return false;
     }
 }
+//função para alterar uma banca
 Banca modificarBanca(int id,std::vector<Banca>& banca)
 {
     bancaId(id,banca[id]);
@@ -132,6 +143,7 @@ Banca modificarBanca(int id,std::vector<Banca>& banca)
     }
     return aux;
 }
+//função do menu
 int menu(std::vector<Banca>& banca)
 {
     int op,id;
@@ -158,9 +170,13 @@ int menu(std::vector<Banca>& banca)
                 mostrarBancas(banca);
                 break;
             case 4:
-                std::cout<<"Digite o id que deseja modificar:"<<std::endl;
-                std::cin>>id;
-                banca[id]=modificarBanca(id,banca);
+                if (!banca.empty())
+                {
+
+                    std::cout<<"Digite o id que deseja modificar:"<<std::endl;
+                    std::cin>>id;
+                    banca[id]=modificarBanca(id,banca);
+                }
                 break;
             case 5:
                 std::cout<<"Digite o id que deseja remover:"<<std::endl;
